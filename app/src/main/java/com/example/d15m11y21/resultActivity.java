@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,13 +20,15 @@ import android.widget.Toast;
  * second | result activity
  */
 
-public class resultActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
+public class resultActivity extends AppCompatActivity implements View.OnCreateContextMenuListener, AdapterView.OnItemLongClickListener{
     static String []st1= new String[20];
     static double [] series = new double[20];
     ListView lv;
     TextView indexTv, tv2;
     double jumps,sum,firstNum;
     int mode;
+    int pos = 01;
+    String massage = "you didn't choose an option";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +53,13 @@ public class resultActivity extends AppCompatActivity implements AdapterView.OnI
         }else if (mode == 1){
             GP(firstNum, jumps);
         }
-
-        lv.setOnItemClickListener(this);
+        lv.setOnCreateContextMenuListener(this);
+        lv.setOnItemLongClickListener(this);
         lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         ArrayAdapter <String>adp = new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,st1);
         lv.setAdapter(adp);
+
     }
 
     /**
@@ -109,13 +114,52 @@ public class resultActivity extends AppCompatActivity implements AdapterView.OnI
      *
      */
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        sum = sumOfSeries(position+1);
-        String massage = "place: "+(id+1)+" sum: "+sum;
-        indexTv.setText(massage);
-
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        pos = position;
+        return false;
+    }
+    /**
+     * create the context menu.
+     * <p>
+     *
+     * @param	v Description	the button the open the menu.
+     *
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        menu.setHeaderTitle("choose an option:");
+        menu.add("get id");
+        menu.add("get sum");
 
     }
+
+    /**
+     * update in the code what the user selected. if 0:get id else (geometric series) 1
+     * <p>
+     *
+     * @param	item Description	user selection.
+     *
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        String oper = item.getTitle().toString();
+        if (oper.equals("get id")) {
+            massage = "place: "+(pos+1);
+            indexTv.setText(massage);
+            return true;
+        } else if (oper.equals("get sum")) {
+            sum = sumOfSeries(pos+1);
+            massage = " sum: "+sum;
+            indexTv.setText(massage);
+            return true;
+        }
+
+        return super.onContextItemSelected(item);
+    }
+
+
+
 
     /**
      * return to the first activity.
@@ -125,4 +169,7 @@ public class resultActivity extends AppCompatActivity implements AdapterView.OnI
     public void ret(View view) {
         finish();
     }
+
+
+
 }
